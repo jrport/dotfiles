@@ -1,0 +1,46 @@
+import = [
+  "/usr/lib/node_modules/alacritty-themes/themes/3024.light.toml"
+]
+
+[window]
+opacity = 0.5
+blur = true
+dynamic_padding = true
+
+  [window.padding]
+  x = 4
+  y = 4
+
+[cursor.style]
+shape = "Beam"
+blinking = "On"
+
+[scrolling]
+history = 1_000
+
+[font]
+size = 12
+
+  [font.normal]
+  family = "Lilex Nerd Font"
+  style = "Semibold"
+
+[[keyboard.bindings]]
+key = "_"
+mods = "Control|Shift"
+action = "DecreaseFontSize"
+
+[[keyboard.bindings]]
+key = "+"
+mods = "Control|Shift"
+action = "IncreaseFontSize"
+
+[[keyboard.bindings]]
+key = "V"
+mods = "Control|Alt"
+action = "ToggleViMode"
+
+[[keyboard.bindings]]
+key = "/"
+mods = "Control|Alt"
+action = "SearchBackward"

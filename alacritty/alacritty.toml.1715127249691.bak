@@ -1,0 +1,17 @@
+[window]
+opacity = 0.5 
+blur = true
+dynamic_padding = true
+padding = {x=4, y=4}
+[scrolling]
+history = 1000
+[font]
+normal = { family = "Lilex Nerd Font", style = "Regular" }
+size = 14 
+[keyboard]
+bindings = [
+    { key = "_", mods = "Control|Shift", action = "DecreaseFontSize" },
+    { key = "+", mods = "Control|Shift", action = "IncreaseFontSize" },
+    { key = "V", mods = "Control|Alt", action = "ToggleViMode" },
+    { key = "/", mods = "Control|Alt", action = "SearchBackward" },
+]

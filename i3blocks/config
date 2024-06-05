@@ -1,0 +1,42 @@
+# i3blocks configuration file
+#
+# The i3blocks man page describes the usage of the binary,
+# and its website describes the configuration:
+#
+#     https://vivien.github.io/i3blocks
+
+
+# Global properties
+separator=true
+separator_block_width=20
+
+[greetings]
+color=#f5af19
+command=echo "Nyahh, $USER!"
+interval=once
+
+[time]
+command=date '+%Y-%m-%d %H:%M:%S'
+interval=1
+
+[state]
+command=acpi -b | grep -Po '(?<=: )([a-zA-Z]+)(?=,)'
+interval=1
+
+[charge]
+command=acpi -b | grep -Po '(?<=g, )(\d{2}%)'
+interval=1
+
+[time]
+command=./battery.sh
+interval=30
+
+# Restart i3 on click
+[restart]
+background=#213a85
+full_text=Restart
+align=center
+command=i3-msg -q restart
+interval=0
+
+      
