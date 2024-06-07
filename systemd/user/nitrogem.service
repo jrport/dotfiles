@@ -1,0 +1,8 @@
+[Unit]
+Description=Wallpaper server
+
+[Service]
+ExecStart=nitrogen --restore &
+
+[Install]
+WantedBy=default.target
