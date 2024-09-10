@@ -12,6 +12,7 @@ return {
     },
     lazy = false,
     config = function()
+        local vim = vim
         local lsp_zero = require('lsp-zero')
 
         lsp_zero.on_attach(function(client, bufnr)
@@ -24,49 +25,59 @@ return {
                 timeout_ms = 10000,
             },
             servers = {
-                ['lua_ls'] = {'lua'},
-                ['solargraph'] = {'ruby'}
+                ['lua_ls'] = { 'lua' },
+                ['solargraph'] = { 'ruby' }
             }
         })
 
-        -- here you can setup the language servers
         require('lspconfig').pyright.setup({})
         require('lspconfig').solargraph.setup({})
-        require('lspconfig').tsserver.setup({
-            filetypes = {"eruby", "javascript"}
+        require('lspconfig').gopls.setup({})
+        require('lspconfig').lua_ls.setup({
+            settings = {
+                Lua = {
+                    diagnostics = {
+                        globals = { 'vim' },
+                    },
+                },
+            },
         })
-        require('lspconfig').lua_ls.setup({})
         require('lspconfig').html.setup({
             filetypes = { "html", "templ", "eruby" }
         })
         require('lspconfig').clangd.setup({})
-        require('lspconfig').tailwindcss.setup {}
+        -- require('lspconfig').tailwindcss.setup {}
         require('lspconfig').emmet_language_server.setup({
-            -- on_attach = on_attach,
             filetypes = { "css", "eruby", "html", "javascriptreact", "less", "sass", "scss", "svelte", "pug", "typescriptreact", "vue" },
         })
 
-        -- -- formmatting on save
-        -- lsp_zero.format_on_save({
-        --     format_opts = {
-        --         async = false,
-        --         timeout_ms = 10000,
-        --     },
-        --     servers = {
-        --         ['tsserver'] = { 'javascript', 'typescript' },
-        --         ['html'] = { "eruby", "html" },
-        --         ['pyright'] = { "python" },
-        --         ['clangd'] = { 'c', 'cpp' },
-        --         ['lua_ls'] = { 'lua' }
-        --     }
-        -- })
+        -- formmatting on save
+        lsp_zero.format_on_save({
+            format_opts = {
+                async = false,
+                timeout_ms = 10000,
+            }
+        })
 
         -- snippets
-        require'luasnip'.filetype_extend("javascript", {"html"})
-        require'luasnip'.filetype_extend("eruby", {"javascript"})
-        require 'luasnip'.filetype_extend("eruby", { "rails","javascript" })
+        require 'luasnip'.filetype_extend("javascript", { "html" })
+        require 'luasnip'.filetype_extend("eruby", { "javascript" })
+        require 'luasnip'.filetype_extend("eruby", { "rails", "javascript" })
         require 'luasnip'.filetype_extend("ruby", { "rails" })
         require("luasnip.loaders.from_vscode").lazy_load()
+
+        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+            group = vim.api.nvim_create_augroup("code_action_sign", { clear = true }),
+            callback = function()
+                require('jrporto.utils.codeactions').code_action_listener()
+            end,
+        })
+
+        vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, bufopts)
+        vim.keymap.set("i", "<a-cr>", vim.lsp.buf.code_action, bufopts)
+        -- vim.keymap.set("n", "<C-r>", vim.lsp.buf.rename, bufopts)
+        vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
+
 
         -- nvim-cmp
         local cmp = require('cmp')
@@ -79,9 +90,10 @@ return {
                 { name = 'buffer' },
             },
             mapping = cmp.mapping.preset.insert({
-                ['<Tab>'] = cmp_action.tab_complete(),
-                ['<S-Tab>'] = cmp_action.select_prev_or_fallback(),
+                ['<S-Tab>'] = cmp.mapping.select_next_item(),
+                ['<Tab>'] = cmp.mapping.select_next_item(),
                 ['<CR>'] = cmp.mapping.confirm({ select = true }),
+                ['<Tab>'] = cmp.mapping.confirm({ select = false }),
             }),
             snippet = {
                 expand = function(args)
@@ -93,4 +105,6 @@ return {
             },
         })
     end
+
+    
 }
