@@ -1,110 +1,120 @@
 return {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-        "j-hui/fidget.nvim",
-        'VonHeikemen/lsp-zero.nvim',
-        'hrsh7th/cmp-nvim-lsp',
-        'hrsh7th/nvim-cmp',
-        'hrsh7th/cmp-buffer',
-        'saadparwaiz1/cmp_luasnip',
-        "L3MON4D3/LuaSnip",
-        "rafamadriz/friendly-snippets",
-    },
-    lazy = false,
-    config = function()
-        local vim = vim
-        local lsp_zero = require('lsp-zero')
+	{
+		"neovim/nvim-lspconfig",
+		lazy = false,
+		dependencies = {
+			"williamboman/mason.nvim",
+			"williamboman/mason-lspconfig.nvim",
+			"L3MON4D3/LuaSnip",
+			"rafamadriz/friendly-snippets",
+			"hrsh7th/nvim-cmp",
+			"hrsh7th/cmp-nvim-lsp",
+			"j-hui/fidget.nvim",
+			"onsails/lspkind.nvim",
+		},
+		config = function()
+			local cmp = require('cmp')
+			local cmp_lsp = require("cmp_nvim_lsp")
+			local capabilities = vim.tbl_deep_extend(
+				"force",
+				{},
+				vim.lsp.protocol.make_client_capabilities(),
+				cmp_lsp.default_capabilities())
 
-        lsp_zero.on_attach(function(client, bufnr)
-            lsp_zero.default_keymaps({ buffer = bufnr })
-        end)
+			capabilities.textDocument.completion.completionItem.snippetSupport = true
+			capabilities.textDocument.foldingRange = { dynamicRegistration = false, lineFoldingOnly = true }
 
-        lsp_zero.format_mapping('<leader>lf', {
-            format_opts = {
-                async = false,
-                timeout_ms = 10000,
-            },
-            servers = {
-                ['lua_ls'] = { 'lua' },
-                ['solargraph'] = { 'ruby' }
-            }
-        })
+			require("fidget").setup({})
+			require("mason").setup()
+			require("mason-lspconfig").setup({
+				handlers = {
+					function(server_name) -- default handler (optional)
+						require("lspconfig")[server_name].setup {
+							capabilities = capabilities
+						}
+					end,
 
-        require('lspconfig').pyright.setup({})
-        require('lspconfig').solargraph.setup({})
-        require('lspconfig').gopls.setup({})
-        require('lspconfig').lua_ls.setup({
-            settings = {
-                Lua = {
-                    diagnostics = {
-                        globals = { 'vim' },
-                    },
-                },
-            },
-        })
-        require('lspconfig').html.setup({
-            filetypes = { "html", "templ", "eruby" }
-        })
-        require('lspconfig').clangd.setup({})
-        -- require('lspconfig').tailwindcss.setup {}
-        require('lspconfig').emmet_language_server.setup({
-            filetypes = { "css", "eruby", "html", "javascriptreact", "less", "sass", "scss", "svelte", "pug", "typescriptreact", "vue" },
-        })
+					["lua_ls"] = function()
+						local lspconfig = require("lspconfig")
+						lspconfig.lua_ls.setup {
+							capabilities = capabilities,
+							settings = {
+								Lua = {
+									runtime = { version = "Lua 5.1" },
+									diagnostics = {
+										globals = { "bit", "vim", "it", "describe", "before_each", "after_each" },
+									}
+								}
+							}
+						}
+					end,
+					-- ["clangd"] = function()
+					-- 	require 'lspconfig'.clangd.setup {
+					-- 		cmd = { "clangd", "--background-index", "--header-insertion=never" },
+					-- 		capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
+					-- 		init_options = {
+					-- 			clangdFileStatus = true
+					-- 		}
+					-- 	}
+					-- end
+				}
+			})
 
-        -- formmatting on save
-        lsp_zero.format_on_save({
-            format_opts = {
-                async = false,
-                timeout_ms = 10000,
-            }
-        })
+			vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+			vim.o.foldlevelstart = 99
+			vim.o.foldenable = true
 
-        -- snippets
-        require 'luasnip'.filetype_extend("javascript", { "html" })
-        require 'luasnip'.filetype_extend("eruby", { "javascript" })
-        require 'luasnip'.filetype_extend("eruby", { "rails", "javascript" })
-        require 'luasnip'.filetype_extend("ruby", { "rails" })
-        require("luasnip.loaders.from_vscode").lazy_load()
+			local k = vim.keymap.set
 
-        vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-            group = vim.api.nvim_create_augroup("code_action_sign", { clear = true }),
-            callback = function()
-                require('jrporto.utils.codeactions').code_action_listener()
-            end,
-        })
+			k('n', '<leader>ll', vim.lsp.buf.format)
 
-        vim.keymap.set("n", "<space>ca", vim.lsp.buf.code_action, bufopts)
-        vim.keymap.set("i", "<a-cr>", vim.lsp.buf.code_action, bufopts)
-        -- vim.keymap.set("n", "<C-r>", vim.lsp.buf.rename, bufopts)
-        vim.keymap.set("n", "gr", vim.lsp.buf.references, bufopts)
+			k('n', 'gd', vim.lsp.buf.definition)
+			k('n', 'gD', vim.lsp.buf.declaration)
+			k('n', 'K', vim.lsp.buf.hover)
+			k('n', 'gi', vim.lsp.buf.implementation)
+			k('n', '<C-k>', vim.lsp.buf.signature_help)
+			k('n', '<space>wa', vim.lsp.buf.add_workspace_folder)
+			k('n', '<space>wr', vim.lsp.buf.remove_workspace_folder)
+			k('n', '<space>wl', function()
+				print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+			end)
+			k('n', '<C-r>', vim.lsp.buf.rename)
+			k('n', 'gr', vim.lsp.buf.references)
+			k('n', '<space>e', vim.diagnostic.open_float)
+			k('n', '[d', vim.diagnostic.goto_prev)
+			k('n', ']d', vim.diagnostic.goto_next)
+			k('n', '<space>q', vim.diagnostic.setloclist)
 
+			-- code actions
+			k("n", "<leader>ca", vim.lsp.buf.code_action)
 
-        -- nvim-cmp
-        local cmp = require('cmp')
-        local cmp_action = require('lsp-zero').cmp_action()
+			require("luasnip.loaders.from_vscode").lazy_load()
 
-        cmp.setup({
-            sources = {
-                { name = 'luasnip' },
-                { name = 'nvim_lsp' },
-                { name = 'buffer' },
-            },
-            mapping = cmp.mapping.preset.insert({
-                ['<S-Tab>'] = cmp.mapping.select_next_item(),
-                ['<Tab>'] = cmp.mapping.select_next_item(),
-                ['<CR>'] = cmp.mapping.confirm({ select = true }),
-                ['<Tab>'] = cmp.mapping.confirm({ select = false }),
-            }),
-            snippet = {
-                expand = function(args)
-                    require('luasnip').lsp_expand(args.body)
-                end,
-            },
-            experimental = {
-                ghost_text = true
-            },
-        })
-    end
-
-    
+			cmp.setup({
+				snippet = {
+					expand = function(args)
+						require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+					end,
+				},
+				mapping = cmp.mapping.preset.insert({
+					['<C-b>'] = cmp.mapping.scroll_docs(-4),
+					['<C-f>'] = cmp.mapping.scroll_docs(4),
+					['<C-Esc>'] = cmp.mapping.abort(),
+					['<Tab>'] = cmp.mapping.select_next_item(),
+					['<S-Tab>'] = cmp.mapping.select_prev_item(),
+					['<C-CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+					['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+				}),
+				experimental = {
+					ghost_text = true,
+				},
+				sources = cmp.config.sources({
+					{ name = 'nvim_lsp' },
+					{ name = 'luasnip' },
+				}, {
+					{ name = 'buffer' },
+				})
+			})
+		end
+	},
 }

@@ -1,28 +1,24 @@
 return {
-    {
-        "bluz71/vim-moonfly-colors",
-        name = "moonfly",
-        lazy = false,
-        priority = 1000,
-        config = function()
-           vim.cmd("colorscheme moonfly")
-        end
-    },
-    {
-        "scottmckendry/cyberdream.nvim",
-        lazy = false,
-        priority = 1000,
-        config = function()
-            require("cyberdream").setup({
-                -- Recommended - see "Configuring" below for more config options
-                transparent = false,
-                italic_comments = true,
-                hide_fillchars = true,
-                borderless_telescope = true,
-                terminal_colors = true,
-            })
-            -- vim.cmd("colorscheme cyberdream") -- set the colorscheme
-        end,
-    }
+	{
+		"bluz71/vim-moonfly-colors",
+		config = function()
+			-- vim.cmd [[colorscheme moonfly]]
+		end
+	},
+	{
+		"baliestri/aura-theme",
+		lazy = false,
+		priority = 1000,
+		config = function(plugin)
+			-- vim.opt.rtp:append(plugin.dir .. "/packages/neovim")
+			-- vim.cmd([[colorscheme aura-dark]])
+		end
+	},
+	{
+		"EdenEast/nightfox.nvim",
+		lazy = false,
+		config = function()
+			vim.cmd [[colorscheme carbonfox]]
+		end
+	} -- lazy
 }
-
