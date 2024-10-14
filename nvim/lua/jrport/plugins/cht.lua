@@ -1,0 +1,5 @@
+-- pckr.add {
+-- 	{
+-- 		'dbeniamine/cheat.sh-vim'
+-- 	}
+-- }
