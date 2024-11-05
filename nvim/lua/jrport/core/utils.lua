@@ -1,3 +1,6 @@
+DARK = false
+COLORSCHEME = false
+
 function Grep_file(open_func)
 	local search_term = vim.fn.input("What to search: ")
 	if search_term == "" then
@@ -58,8 +61,8 @@ function Find_file(open_func)
 		end,
 	}, function(choice)
 		if choice == nil then
-	             print("No selection")
-		     return
+			print("No selection")
+			return
 		end
 		open_func(choice)
 	end)
@@ -108,13 +111,13 @@ function Scribble_stuff()
 		return
 	end
 
-	local file_path = path..filename
+	local file_path = path .. filename
 	local fd = io.open(file_path, "w")
 
 	if fd then
 		io.close(fd)
-		vim.cmd("edit"..file_path)
-		print("File"..file_path.." Created")
+		vim.cmd("edit" .. file_path)
+		print("File" .. file_path .. " Created")
 		return
 	else
 		print("Error on file creation")
@@ -126,18 +129,39 @@ function HelpSelected()
 	local s_end = vim.fn.getpos("'>")
 	local lines = vim.api.nvim_buf_get_lines(0, s_start[2] - 1, s_start[2], false)
 	local selected_text = string.sub(lines[1], s_start[3], s_end[3])
-	vim.cmd("tab help "..selected_text)
+	vim.cmd("tab help " .. selected_text)
 end
 
 function InsertGoErr()
-  local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
-  vim.api.nvim_buf_set_lines(0, row - 1, row, false, { "if err != nil {" })
-  vim.api.nvim_buf_set_lines(0, row, row, false, { "" })
-  vim.api.nvim_buf_set_lines(0, row, row, false, { "}" })
+	local row, _ = unpack(vim.api.nvim_win_get_cursor(0))
+	vim.api.nvim_buf_set_lines(0, row - 1, row, false, { "if err != nil {" })
+	vim.api.nvim_buf_set_lines(0, row, row, false, { "" })
+	vim.api.nvim_buf_set_lines(0, row, row, false, { "}" })
 end
 
--- Map the function to a key combination if you want
+function ToggleBackground()
+	if vim.o.background == "dark" then
+		vim.o.background = "light"
+		vim.cmd("colorscheme default")
+	else
+		vim.o.background = "dark"
+		vim.cmd("colorscheme default")
+	end
+end
+
+function ToggleColorscheme()
+	local cur_colorscheme = vim.g.colors_name
+
+	if cur_colorscheme  == "gruvbox" then
+		vim.cmd("colorscheme solarized")
+	else
+		vim.cmd("colorscheme gruvbox")
+	end
+end
+
+K('n', '<A-p>', ':lua ToggleBackground()<CR>', { noremap = true, silent = true })
+K('n', '<A-o>', ':lua ToggleColorscheme()<CR>', { noremap = true, silent = true })
 K('n', '<A-e>', ':lua InsertGoErr()<CR>', { noremap = true, silent = true })
 K('v', '<leader>h', ':lua HelpSelected()<CR>', { noremap = true, silent = true })
 K("n", "<A-j>", Jump_line)
-K("n", "<leader>tb", Scribble_stuff)
+K("n", "<leader>bb", Scribble_stuff)
