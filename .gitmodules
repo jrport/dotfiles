@@ -1,3 +1,6 @@
 [submodule "nvim"]
 	path = nvim
 	url = git@github.com:jrport/nvim.git
+[submodule "hypr"]
+	path = hypr
+	url = https://github.com/jrport/hypr
